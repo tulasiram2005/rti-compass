@@ -31,6 +31,7 @@ function render(){
  }
  $('letter').value=c.application;$('response').value=c.reply;$('grounds').value=c.grounds;
  $('events').replaceChildren(...c.events.map(e=>el('li',e.date+' · '+e.state+(e.detail?' — '+e.detail:''))));
+ $('suspend').hidden=!(c.ordinary&&due?.label==='Reply');
  const options=flow[c.events.at(-1).state].filter(s=>s!=='Deemed non-reply'||(due&&due.date<today()));
  $('next').replaceChildren(...options.map(s=>new Option(s,s)));$('step').hidden=!options.length;
  $('when').value=today();$('when').min=c.events.at(-1).date;$('when').max=today();$('detail').value='';
@@ -115,4 +116,28 @@ $('scan').onchange=async e=>{
   $('progress').textContent=text.trim()?'Text added to '+target.title+'. Review and correct the transcription.':'No text found. Try a clearer scan.';
  }catch(err){$('progress').textContent='Scan could not be read. '+err.message;}
  finally{e.target.disabled=false;e.target.value='';}
+};
+
+const directory=[
+ ['Ministry of Railways (Railway Board)','https://indianrailways.gov.in/connect/rti'],
+ ['Hyderabad District, Telangana','https://hyderabad.telangana.gov.in/rti/'],
+ ['Central Hindi Directorate','https://www.chd.education.gov.in/en/right-to-information-act']
+];
+for(const [name,url] of directory){
+ const item=el('li',''),link=el('a',name),select=el('button','Use authority');
+ link.href=url;link.target='_blank';link.rel='noopener';select.type='button';
+ select.onclick=()=>{$('authority').value=name;};item.append(link,' ',select);$('directory').append(item);
+}
+$('suspend').onclick=()=>{
+ active.ordinary=false;dirty=true;render();announce('Ordinary estimate suspended. Check the applicable deadline.');
+};
+$('suggest').onclick=()=>{
+ const questions=[];
+ const result=review(active.reply);
+ if(result.cites.includes('7(8)'))questions.push('Section 7(8): Did the decision explain the refusal, appeal period and appellate authority? Identify any missing particulars.');
+ if(result.cites.includes('10(1)'))questions.push('Section 10(1): Which parts of the requested record could reasonably be released separately?');
+ if(active.events.some(e=>e.state==='Deemed non-reply'))questions.push('Sections 7(2) and 19(1): Identify the confirmed receipt date, applicable deadline and evidence that a decision was overdue.');
+ questions.push('Section 19(1): Identify the decision or delay being challenged and the specific records still sought.');
+ const additions=questions.filter(q=>!active.grounds.includes(q));
+ active.grounds=[active.grounds,...additions].filter(Boolean).join('\n\n');dirty=true;$('grounds').value=active.grounds;
 };

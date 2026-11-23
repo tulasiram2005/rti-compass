@@ -3,7 +3,7 @@ A local-first case desk for drafting and tracking Indian Right to Information re
 
 [Open the public demo](https://tulasiram2005.github.io/rti-compass/)
 
-Try a synthetic case or select **New case**. Enter the public authority, record descriptions and language. Edit the resulting application, record events and review replies. Print an application or appeal pack with the browser’s Save as PDF option. Use **Workspace files** to download an encrypted backup before leaving. Each visit starts a new temporary desk.
+Try a synthetic case or select **New case**. Enter the public authority, record descriptions and language. Edit the resulting application, record events and review replies. Import a reply photo or PDF and review the extracted text. Language models for optical character recognition load from this site only when needed. Print an application or appeal pack with the browser’s Save as PDF option. Use **Workspace files** to download an encrypted backup before leaving. Each visit starts a new temporary desk.
 
 ## Run and check
 Use Node 22 and Python 3. Run `npm test` for the core suite and `npm start` for the local desk at http://127.0.0.1:4173. No runtime dependencies, service keys, payment details or plugins are required.

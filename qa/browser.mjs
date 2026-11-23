@@ -28,6 +28,14 @@ try{
  await page.locator('#scan').setInputFiles({name:'synthetic.png',mimeType:'image/png',buffer:Buffer.from(sample,'base64')});
  await page.waitForFunction(()=>document.querySelector('#response').value.includes('enclosed')||document.querySelector('#progress').textContent.includes('could not'),null,{timeout:90000});
  assert.match(await page.locator('#response').inputValue(),/enclosed/,await page.locator('#progress').innerText());
+ const fixture=await browser.newPage();
+ await fixture.setContent('<p>Synthetic PDF reply. Inspection sheets provided.</p>');
+ const pdf=await fixture.pdf();
+ await fixture.close();
+ await page.locator('#scan').setInputFiles({name:'synthetic.pdf',mimeType:'application/pdf',buffer:pdf});
+ await page.waitForFunction(()=>document.querySelector('#response').value.includes('Inspection sheets'));
+ await page.locator('#suggest').click();
+ assert.match(await page.locator('#grounds').inputValue(),/19\(1\)/);
  await page.locator('#vault').click();await page.locator('#pass').fill('Synthetic browser passphrase');
  const download=page.waitForEvent('download');await page.locator('#save').click();
  const backup=await (await download).path();
