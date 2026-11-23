@@ -12,7 +12,7 @@ try{
  for(const [id,value] of [['name','Synthetic browser fixture'],['authority','Sample office'],['records','Water test reports']])await page.locator('#'+id).fill(value);
  await page.locator('#lang').selectOption('te');
  await page.locator('#bilingual').check();
- await page.locator('#builder button').first().click();
+ await page.getByRole('button',{name:'Create draft',exact:true}).click();
  assert.match(await page.locator('#letter').inputValue(),/సమాచార/);
  await page.getByRole('button',{name:'Timeline',exact:true}).click();
  await page.locator('#ordinary').check();await page.locator('#detail').fill('Post');
