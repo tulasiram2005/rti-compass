@@ -19,7 +19,7 @@ try{
  await page.locator('#step button').click();
  assert.match(await page.locator('#status').innerText(),/Reply estimate/);
  await page.getByRole('button',{name:'Reply & appeal'}).click();
- await page.locator('summary').click();
+ await page.locator('#reply summary').click();
  const sample=await page.evaluate(()=>{
   const c=document.createElement('canvas');c.width=900;c.height=160;
   const ctx=c.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,900,160);ctx.fillStyle='black';ctx.font='44px sans-serif';ctx.fillText('Records are enclosed.',32,84);
