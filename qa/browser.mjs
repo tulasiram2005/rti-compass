@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright-core';
+const browser=await chromium.launch({channel:'chrome'});
+try{
+ const page=await browser.newPage();
+ const errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(process.env.DESK_URL||'http://127.0.0.1:4173');
+ await page.locator('#cases button').first().waitFor();
+ assert.equal(await page.locator('#cases button').count(),6);
+ await page.locator('#newcase').click();
+ for(const [id,value] of [['name','Synthetic browser fixture'],['authority','Sample office'],['records','Water test reports']])await page.locator('#'+id).fill(value);
+ await page.locator('#lang').selectOption('te');
+ await page.locator('#bilingual').check();
+ await page.locator('#builder button').first().click();
+ assert.match(await page.locator('#letter').inputValue(),/సమాచార/);
+ await page.getByRole('button',{name:'Timeline',exact:true}).click();
+ await page.locator('#ordinary').check();await page.locator('#detail').fill('Post');
+ await page.locator('#step button').click();
+ assert.match(await page.locator('#status').innerText(),/Reply estimate/);
+ await page.getByRole('button',{name:'Reply & appeal'}).click();
+ await page.locator('summary').click();
+ const sample=await page.evaluate(()=>{
+  const c=document.createElement('canvas');c.width=900;c.height=160;
+  const ctx=c.getContext('2d');ctx.fillStyle='white';ctx.fillRect(0,0,900,160);ctx.fillStyle='black';ctx.font='44px sans-serif';ctx.fillText('Records are enclosed.',32,84);
+  return c.toDataURL().split(',')[1];
+ });
+ await page.locator('#scan').setInputFiles({name:'synthetic.png',mimeType:'image/png',buffer:Buffer.from(sample,'base64')});
+ await page.waitForFunction(()=>document.querySelector('#response').value.includes('enclosed')||document.querySelector('#progress').textContent.includes('could not'),null,{timeout:90000});
+ assert.match(await page.locator('#response').inputValue(),/enclosed/,await page.locator('#progress').innerText());
+ await page.locator('#vault').click();await page.locator('#pass').fill('Synthetic browser passphrase');
+ const download=page.waitForEvent('download');await page.locator('#save').click();
+ const backup=await (await download).path();
+ await page.locator('#import').setInputFiles(backup);
+ await page.waitForFunction(()=>document.querySelector('#vaultmsg').textContent.includes('Restored'));
+ await page.locator('#files [data-close]').click();
+ await page.setViewportSize({width:390,height:844});
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ assert.deepEqual(errors,[]);
+ console.log('Passed: demo, bilingual drafting, filing, estimate, local image OCR, encrypted save and restore, mobile width.');
+}finally{await browser.close();}

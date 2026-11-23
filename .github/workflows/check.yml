@@ -12,3 +12,10 @@ jobs:
           node-version: 22
       - run: npm test
       - run: node --check docs/desk.mjs
+
+      - run: npm ci
+      - name: Exercise the desk in Chrome
+        run: |
+          npm start > /tmp/rti-desk.log 2>&1 &
+          for i in {1..20}; do curl -fsS http://127.0.0.1:4173/ > /dev/null && break || sleep 1; done
+          node qa/browser.mjs

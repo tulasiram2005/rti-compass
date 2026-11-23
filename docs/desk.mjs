@@ -101,3 +101,18 @@ $('import').onchange=async e=>{
 $('erase').onclick=()=>{if(confirm('Clear every case from this tab? Export first if you need a copy.')){cases=[];active=null;dirty=false;render();$('files').close();announce('Desk cleared. Choose New case to start.');}};
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
 render();
+
+$('scan').onchange=async e=>{
+ const file=e.target.files[0],target=active;
+ if(!file||!target)return;
+ e.target.disabled=true;
+ try{
+  const {readReply}=await import('./ocr.mjs');
+  const text=await readReply(file,$('ocr-lang').value,message=>{$('progress').textContent=message;});
+  if(!cases.includes(target))return;
+  target.reply=[target.reply,text.trim()].filter(Boolean).join('\n\n');dirty=true;
+  if(active===target)render();
+  $('progress').textContent=text.trim()?'Text added to '+target.title+'. Review and correct the transcription.':'No text found. Try a clearer scan.';
+ }catch(err){$('progress').textContent='Scan could not be read. '+err.message;}
+ finally{e.target.disabled=false;e.target.value='';}
+};

@@ -1,1 +1,1 @@
-{"name":"rti-compass","private":true,"version":"0.1.0","scripts":{"test":"node --test","start":"python3 -m http.server 4173 --bind 127.0.0.1 --directory docs"}}
+{"name":"rti-compass","private":true,"version":"0.1.0","scripts":{"test":"node --test","start":"python3 -m http.server 4173 --bind 127.0.0.1 --directory docs"},"devDependencies":{"playwright-core":"1.65.1"}}
